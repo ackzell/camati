@@ -1,0 +1,7 @@
+{
+    "editor.fontFamily": "'Cascadia Code', Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontSize": 16,
+    "editor.formatOnSave": true,
+    "workbench.iconTheme": "ayu",
+    "workbench.colorTheme": "Ayu Dark Bordered"
+}
