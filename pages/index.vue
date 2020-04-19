@@ -1,17 +1,142 @@
 <template>
   <v-row align="center" justify="center">
     <v-col cols="12" sm="8" md="4">
+      <p class="caption text-right">
+        You can record a quick message (up to 1 min) and send it to us!
+      </p>
       <v-card class="elevation-12">
-        <v-toolbar color="primary" dark flat>
+        <v-toolbar color="primary" flat>
           <v-toolbar-title>VoiceMail</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn
+            :color="isRecording ? 'red' : 'primary darken-2'"
+            @click="isRecording = !isRecording"
+          >
+            <v-icon dark>{{
+              isRecording ? 'mdi-record-rec' : 'mdi-microphone'
+            }}</v-icon>
+          </v-btn>
         </v-toolbar>
         <v-card-text>
-          <p>Welcome!</p>
-          <p>You can record a quick message (1 min tops) and send it to us!</p>
+          <p class="display-2 text-center">01:12</p>
+
+          <v-list elevation="5" shaped color="primary">
+            <v-list-item-group v-model="selected" mandatory>
+              <v-list-item>
+                <v-list-item-avatar>
+                  <v-btn x-large icon>
+                    <!-- <v-icon color="">mdi-play</v-icon> -->
+                    <v-icon>mdi-pause</v-icon>
+                  </v-btn>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title class="overline">
+                    Recording 1
+                  </v-list-item-title>
+                  01:34
+                  <v-progress-linear
+                    value="45"
+                    active
+                    color="primary lighten-4"
+                    rounded
+                  />
+                </v-list-item-content>
+                <v-list-item-action>
+                  <v-btn icon color="primary darken-3" @click.stop>
+                    <v-icon>mdi-download</v-icon>
+                  </v-btn>
+                </v-list-item-action>
+                <v-list-item-action>
+                  <v-btn icon x-small>
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-list-item-action>
+              </v-list-item>
+
+              <v-divider inset></v-divider>
+
+              <v-list-item>
+                <v-list-item-avatar>
+                  <v-btn x-large icon>
+                    <v-icon color="">mdi-play</v-icon>
+                  </v-btn>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title class="overline">
+                    Recording 2
+                  </v-list-item-title>
+                  00:03
+                  <v-progress-linear
+                    value="0"
+                    active
+                    class="primary lighten-4"
+                    rounded
+                  />
+                </v-list-item-content>
+                <v-list-item-action>
+                  <v-btn icon color="primary darken-3" @click.stop>
+                    <v-icon>mdi-download</v-icon>
+                  </v-btn>
+                </v-list-item-action>
+                <v-list-item-action>
+                  <v-btn icon x-small>
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-list-item-action>
+              </v-list-item>
+
+              <v-divider inset></v-divider>
+
+              <v-list-item>
+                <v-list-item-avatar>
+                  <v-btn x-large icon>
+                    <v-icon color="">mdi-play</v-icon>
+                    <!-- <v-icon>mdi-pause</v-icon> -->
+                  </v-btn>
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title class="overline">
+                    Recording 3
+                  </v-list-item-title>
+                  01:12
+                  <v-progress-linear
+                    value="4"
+                    active
+                    class="primary lighten-4"
+                    rounded
+                  />
+                </v-list-item-content>
+                <v-list-item-action>
+                  <v-btn icon color="primary darken-3" @click.stop>
+                    <v-icon>mdi-download</v-icon>
+                  </v-btn>
+                </v-list-item-action>
+                <v-list-item-action>
+                  <v-btn icon x-small>
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-list-item-action>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary">Send</v-btn>
+          <!-- <v-btn color="primary" :disabled="!audios.length">Send it!</v-btn> -->
+        </v-card-actions>
+      </v-card>
+
+      <v-card class="mt-4">
+        <v-card-text>
+          <v-text-field
+            name="name"
+            label="Your Name"
+            single-line
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" :disabled="!audios.length">Send it!</v-btn>
         </v-card-actions>
       </v-card>
     </v-col>
@@ -21,11 +146,15 @@
 <script>
 import { WebAudioRecorder } from 'web-audio-recorder-js-webpack'
 
+// import RecordingButton from '@/components/RecordingButton.vue'
+
 const ENCODING_TYPE = 'mp3'
 const ENCODE_AFTER_RECORD = true
 
 export default {
-  components: {},
+  components: {
+    // RecordingButton
+  },
   data() {
     return {
       availableDevices: [],
@@ -36,20 +165,23 @@ export default {
       getUserMediaStream: null,
       recorder: null,
       input: null,
-      audioContext: null
+      audioContext: null,
+      selected: null
     }
   },
   async created() {
-    const mediaDevices = await navigator.mediaDevices.getUserMedia({
-      audio: true
-    })
+    if (navigator && navigator.mediaDevices) {
+      const mediaDevices = await navigator.mediaDevices.getUserMedia({
+        audio: true
+      })
 
-    if (mediaDevices) {
-      const devices = await navigator.mediaDevices.enumerateDevices()
+      if (mediaDevices) {
+        const devices = await navigator.mediaDevices.enumerateDevices()
 
-      this.availableDevices = devices.filter(
-        (device) => device.kind === 'audioinput'
-      )
+        this.availableDevices = devices.filter(
+          (device) => device.kind === 'audioinput'
+        )
+      }
     }
   },
   methods: {
@@ -154,3 +286,10 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+.v-application--is-ltr .v-list-item__action:last-of-type:not(:only-child),
+.v-application--is-ltr .v-list-item__avatar:last-of-type:not(:only-child),
+.v-application--is-ltr .v-list-item__icon:last-of-type:not(:only-child) {
+  margin-left: 0;
+}
+</style>
