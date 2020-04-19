@@ -20,7 +20,7 @@
           </v-btn>
 
           <!-- discard recording -->
-          <v-btn icon :disabled="!isRecording" @click="stopRecording">
+          <v-btn icon :disabled="!isRecording" @click="cancelRecording">
             <v-icon small>mdi-delete</v-icon>
           </v-btn>
         </v-toolbar>
@@ -31,6 +31,12 @@
             v-model="selected"
             :recordings="audios"
           ></recordings-list>
+
+          <ul v-if="recordings.length">
+            <li v-for="(audio, index) in recordings" :key="index">
+              <audio :src="audio" controls></audio>
+            </li>
+          </ul>
 
           selected: {{ selected }}
         </v-card-text>
@@ -54,8 +60,6 @@
 </template>
 
 <script>
-import { WebAudioRecorder } from 'web-audio-recorder-js-webpack'
-
 import RecordingsList from '@/components/RecordingsList'
 import Timer from '@/components/Timer'
 
@@ -81,35 +85,34 @@ export default {
       input: null,
       audioContext: null,
       selected: null,
-      timerStatus: 'stopped'
+      timerStatus: 'stopped',
+      recordings: []
     }
+  },
+  created() {
+    console.log(typeof WebAudioRecorder)
   },
   methods: {
     toggleRecorder() {
       this.isRecording = !this.isRecording
       this.timerStatus = this.isRecording ? 'started' : 'stopped'
+      if (this.isRecording) {
+        this.startRecording()
+      } else {
+        this.stopRecording()
+      }
+    },
+    cancelRecording() {
+      this.timerStatus = 'stopped'
+      this.isRecording = false
     },
     startRecording() {
-      if (navigator.mediaDevices) {
-        console.warn(
-          'about to start recording using',
-          this.availableDevices.find((d) => d.deviceId === this.selectedDevice)
-        )
-
+      if (navigator && navigator.mediaDevices) {
         navigator.mediaDevices
           .getUserMedia({
-            audio: true,
-            deviceId: {
-              exact: this.selectedDevice
-            }
+            audio: true
           })
           .then((stream) => {
-            navigator.mediaDevices.enumerateDevices().then((devices) => {
-              this.availableDevices = devices.filter(
-                (device) => device.kind === 'audioinput'
-              )
-            })
-
             console.warn(
               'getUserMedia() success, stream created, initializing WebAudioRecorder...'
             )
@@ -123,8 +126,8 @@ export default {
             /* use the stream */
             this.input = this.audioContext.createMediaStreamSource(stream)
 
-            this.recorder = new WebAudioRecorder(this.input, {
-              workerDir: 'js/web-audio-recorder-js-master/lib-minified/',
+            this.recorder = new window.WebAudioRecorder(this.input, {
+              workerDir: 'js/WebAudioRecorder/',
               encoding: ENCODING_TYPE,
               onEncoderLoading: (recorder, encoding) => {
                 // show "loading encoder..." display
@@ -137,7 +140,8 @@ export default {
               onComplete: (recorder, blob) => {
                 console.warn('Encoding complete')
                 const url = URL.createObjectURL(blob)
-                this.audios.push(url)
+                console.log(blob)
+                this.recordings.push(url)
                 // createDownloadLink(blob, recorder.encoding);
               }
             })
@@ -169,15 +173,20 @@ export default {
       //   // see https://blog.addpipe.com/using-webaudiorecorder-js-to-record-audio-on-your-website/
       //   // I don't understand why they initialize the recording object
       //   // every single time a new recording is started 🤔
-      //   this.getUserMediaStream.getAudioTracks()[0].stop()
+      this.getUserMediaStream.getAudioTracks()[0].stop()
 
       // tell the recorder to finish the recording (stop recording + encode the recorded audio)
-      // this.recorder.finishRecording()
-      // console.warn('Recording stopped')
+      this.recorder.finishRecording()
+      console.warn('Recording stopped')
       // },
       // log(event) {
       //   console.warnData += event + `<br>`
       // }
+    }
+  },
+  head() {
+    return {
+      script: [{ src: '/WebAudioRecorder.js', defer: true }]
     }
   }
 }
