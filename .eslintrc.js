@@ -15,6 +15,7 @@ module.exports = {
     'plugin:nuxt/recommended'
   ],
   plugins: ['prettier'],
+  ignorePatterns: ['static/'],
   // add your custom rules here
   rules: {
     'no-console': 'off'
