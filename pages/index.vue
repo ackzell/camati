@@ -10,120 +10,26 @@
           <v-spacer></v-spacer>
           <v-btn
             :color="isRecording ? 'red' : 'primary darken-2'"
-            @click="isRecording = !isRecording"
+            @click="toggleRecorder"
           >
             <v-icon dark>{{
-              isRecording ? 'mdi-record-rec' : 'mdi-microphone'
+              isRecording ? 'mdi-pause' : 'mdi-microphone'
             }}</v-icon>
+          </v-btn>
+          <v-btn icon @click="stopRecording">
+            <v-icon>mdi-stop</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          <p class="display-2 text-center">01:12</p>
+          <current-timer :elapsed-time="timer"></current-timer>
 
-          <v-list elevation="5" shaped color="primary">
-            <v-list-item-group v-model="selected" mandatory>
-              <v-list-item>
-                <v-list-item-avatar>
-                  <v-btn x-large icon>
-                    <!-- <v-icon color="">mdi-play</v-icon> -->
-                    <v-icon>mdi-pause</v-icon>
-                  </v-btn>
-                </v-list-item-avatar>
-                <v-list-item-content>
-                  <v-list-item-title class="overline">
-                    Recording 1
-                  </v-list-item-title>
-                  01:34
-                  <v-progress-linear
-                    value="45"
-                    active
-                    color="primary lighten-4"
-                    rounded
-                  />
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-btn icon color="primary darken-3" @click.stop>
-                    <v-icon>mdi-download</v-icon>
-                  </v-btn>
-                </v-list-item-action>
-                <v-list-item-action>
-                  <v-btn icon x-small>
-                    <v-icon>mdi-close</v-icon>
-                  </v-btn>
-                </v-list-item-action>
-              </v-list-item>
+          <recordings-list
+            v-model="selected"
+            :recordings="audios"
+          ></recordings-list>
 
-              <v-divider inset></v-divider>
-
-              <v-list-item>
-                <v-list-item-avatar>
-                  <v-btn x-large icon>
-                    <v-icon color="">mdi-play</v-icon>
-                  </v-btn>
-                </v-list-item-avatar>
-                <v-list-item-content>
-                  <v-list-item-title class="overline">
-                    Recording 2
-                  </v-list-item-title>
-                  00:03
-                  <v-progress-linear
-                    value="0"
-                    active
-                    class="primary lighten-4"
-                    rounded
-                  />
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-btn icon color="primary darken-3" @click.stop>
-                    <v-icon>mdi-download</v-icon>
-                  </v-btn>
-                </v-list-item-action>
-                <v-list-item-action>
-                  <v-btn icon x-small>
-                    <v-icon>mdi-close</v-icon>
-                  </v-btn>
-                </v-list-item-action>
-              </v-list-item>
-
-              <v-divider inset></v-divider>
-
-              <v-list-item>
-                <v-list-item-avatar>
-                  <v-btn x-large icon>
-                    <v-icon color="">mdi-play</v-icon>
-                    <!-- <v-icon>mdi-pause</v-icon> -->
-                  </v-btn>
-                </v-list-item-avatar>
-                <v-list-item-content>
-                  <v-list-item-title class="overline">
-                    Recording 3
-                  </v-list-item-title>
-                  01:12
-                  <v-progress-linear
-                    value="4"
-                    active
-                    class="primary lighten-4"
-                    rounded
-                  />
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-btn icon color="primary darken-3" @click.stop>
-                    <v-icon>mdi-download</v-icon>
-                  </v-btn>
-                </v-list-item-action>
-                <v-list-item-action>
-                  <v-btn icon x-small>
-                    <v-icon>mdi-close</v-icon>
-                  </v-btn>
-                </v-list-item-action>
-              </v-list-item>
-            </v-list-item-group>
-          </v-list>
+          selected: {{ selected }}
         </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <!-- <v-btn color="primary" :disabled="!audios.length">Send it!</v-btn> -->
-        </v-card-actions>
       </v-card>
 
       <v-card class="mt-4">
@@ -146,14 +52,16 @@
 <script>
 import { WebAudioRecorder } from 'web-audio-recorder-js-webpack'
 
-// import RecordingButton from '@/components/RecordingButton.vue'
+import RecordingsList from '@/components/RecordingsList'
+import CurrentTimer from '@/components/CurrentTimer'
 
 const ENCODING_TYPE = 'mp3'
 const ENCODE_AFTER_RECORD = true
 
 export default {
   components: {
-    // RecordingButton
+    RecordingsList,
+    CurrentTimer
   },
   data() {
     return {
@@ -161,12 +69,17 @@ export default {
       selectedDevice: null,
       logData: '',
       isRecording: false,
-      audios: [],
+      audios: [
+        { duration: '01:45' },
+        { duration: '01:23' },
+        { duration: '00:21' }
+      ],
       getUserMediaStream: null,
       recorder: null,
       input: null,
       audioContext: null,
-      selected: null
+      selected: null,
+      timer: null
     }
   },
   async created() {
@@ -185,6 +98,25 @@ export default {
     }
   },
   methods: {
+    toggleRecorder() {
+      this.isRecording = !this.isRecording
+      this.toggleTimer()
+    },
+    toggleTimer() {
+      if (this.isRunning) {
+        clearInterval(this.interval)
+        console.log('timer stops')
+      } else {
+        this.interval = setInterval(this.incrementTime, 1000)
+      }
+      this.isRunning = !this.isRunning
+    },
+    incrementTime() {
+      this.timer = +this.timer + 1
+    },
+    stopTimer() {
+      this.timer = 0
+    },
     inputChanged() {
       // console.log('input changed')
       if (this.getUserMediaStream) {
@@ -268,28 +200,25 @@ export default {
     },
     stopRecording() {
       this.isRecording = false
-      // stop microphone access
-      //! can't do this, otherwise can't record further notes
 
-      // see https://blog.addpipe.com/using-webaudiorecorder-js-to-record-audio-on-your-website/
-      // I don't understand why they initialize the recording object
-      // every single time a new recording is started 🤔
-      this.getUserMediaStream.getAudioTracks()[0].stop()
+      this.stopTimer()
 
-      // tell the recorder to finish the recording (stop recording + encode the recorded audio)
-      this.recorder.finishRecording()
-      this.log('Recording stopped')
-    },
-    log(event) {
-      this.logData += event + `<br>`
+      //   // stop microphone access
+      //   //! can't do this, otherwise can't record further notes
+
+      //   // see https://blog.addpipe.com/using-webaudiorecorder-js-to-record-audio-on-your-website/
+      //   // I don't understand why they initialize the recording object
+      //   // every single time a new recording is started 🤔
+      //   this.getUserMediaStream.getAudioTracks()[0].stop()
+
+      //   // tell the recorder to finish the recording (stop recording + encode the recorded audio)
+      //   this.recorder.finishRecording()
+      //   this.log('Recording stopped')
+      // },
+      // log(event) {
+      //   this.logData += event + `<br>`
+      // }
     }
   }
 }
 </script>
-<style lang="scss">
-.v-application--is-ltr .v-list-item__action:last-of-type:not(:only-child),
-.v-application--is-ltr .v-list-item__avatar:last-of-type:not(:only-child),
-.v-application--is-ltr .v-list-item__icon:last-of-type:not(:only-child) {
-  margin-left: 0;
-}
-</style>
