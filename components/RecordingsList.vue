@@ -5,37 +5,43 @@
       mandatory
       @change="$emit('input', selected)"
     >
-      <v-list-item v-for="(recording, index) in recordings" :key="index">
-        <v-list-item-avatar>
-          <v-btn x-large icon @click="isPlaying = !isPlaying">
-            <v-icon v-if="isPlaying">mdi-pause</v-icon>
-            <v-icon v-else>mdi-play</v-icon>
-          </v-btn>
-        </v-list-item-avatar>
-        <v-list-item-content>
-          <v-list-item-title class="overline">
-            Recording {{ index + 1 }}
-          </v-list-item-title>
-          {{ recording.duration }}
-          <v-progress-linear
-            value="45"
-            active
-            color="primary lighten-4"
-            rounded
-          />
-        </v-list-item-content>
-        <v-list-item-action>
-          <v-btn icon color="primary darken-3" @click.stop>
-            <v-icon>mdi-download</v-icon>
-          </v-btn>
-        </v-list-item-action>
-        <v-list-item-action>
-          <v-btn icon x-small>
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-list-item-action>
-      </v-list-item>
-      <v-divider inset></v-divider>
+      <div v-for="(recording, index) in recordings" :key="index">
+        <v-list-item>
+          <v-list-item-avatar>
+            <v-btn
+              x-large
+              icon
+              @click="recording.isPlaying = !recording.isPlaying"
+            >
+              <v-icon v-if="recording.isPlaying">mdi-pause</v-icon>
+              <v-icon v-else>mdi-play</v-icon>
+            </v-btn>
+          </v-list-item-avatar>
+          <v-list-item-content>
+            <v-list-item-title class="overline">
+              Recording {{ index + 1 }}
+            </v-list-item-title>
+            {{ recording.duration }}
+            <v-progress-linear
+              value="45"
+              active
+              color="primary lighten-4"
+              rounded
+            />
+          </v-list-item-content>
+          <v-list-item-action>
+            <v-btn icon color="primary darken-3" @click.stop>
+              <v-icon>mdi-download</v-icon>
+            </v-btn>
+          </v-list-item-action>
+          <v-list-item-action>
+            <v-btn icon x-small>
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-list-item-action>
+        </v-list-item>
+        <v-divider v-show="index != recordings.length - 1" inset></v-divider>
+      </div>
     </v-list-item-group>
   </v-list>
 </template>
@@ -54,8 +60,7 @@ export default {
   },
   data() {
     return {
-      selected: this.selectedItem,
-      isPlaying: false
+      selected: this.selectedItem
     }
   }
 }

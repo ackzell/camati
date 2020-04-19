@@ -70,9 +70,10 @@ export default {
       logData: '',
       isRecording: false,
       audios: [
-        { duration: '01:45' },
-        { duration: '01:23' },
-        { duration: '00:21' }
+        { isPlaying: false, duration: '01:45', volume: 50 },
+        { isPlaying: false, duration: '01:23', volume: 50 },
+        { isPlaying: false, duration: '00:21', volume: 50 },
+        { isPlaying: false, duration: '00:13', volume: 50 }
       ],
       getUserMediaStream: null,
       recorder: null,
@@ -115,7 +116,11 @@ export default {
       this.timer = +this.timer + 1
     },
     stopTimer() {
+      // reset the count
       this.timer = 0
+      // and reset the timer
+      clearInterval(this.interval)
+      this.isRunning = false
     },
     inputChanged() {
       // console.log('input changed')
