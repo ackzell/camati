@@ -6,7 +6,7 @@
       @change="$emit('input', selected)"
     >
       <div v-for="(recording, index) in recordings" :key="index">
-        <v-list-item>
+        <v-list-item :ripple="false">
           <v-list-item-avatar>
             <v-btn
               x-large
@@ -21,12 +21,13 @@
             <v-list-item-title class="overline">
               Recording {{ index + 1 }}
             </v-list-item-title>
-            {{ recording.duration }}
-            <v-progress-linear
+            <v-slider
               value="45"
               active
               color="primary lighten-4"
               rounded
+              inverse-label
+              :label="`00:00 / ${recording.duration}`"
             />
           </v-list-item-content>
           <v-list-item-action>
