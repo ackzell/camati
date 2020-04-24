@@ -8,25 +8,35 @@
         <v-toolbar color="primary" flat>
           <v-toolbar-title>VoiceMail</v-toolbar-title>
           <v-spacer></v-spacer>
+
+          <!-- Start  / Finish recording -->
           <v-btn
             :color="isRecording ? 'red' : 'primary darken-2'"
             @click="toggleRecorder"
           >
             <v-icon dark>{{
-              isRecording ? 'mdi-pause' : 'mdi-microphone'
+              isRecording ? 'mdi-stop' : 'mdi-microphone'
             }}</v-icon>
           </v-btn>
-          <v-btn icon @click="stopRecording">
-            <v-icon>mdi-stop</v-icon>
+
+          <!-- discard recording -->
+          <v-btn icon :disabled="!isRecording" @click="cancelRecording">
+            <v-icon small>mdi-delete</v-icon>
           </v-btn>
         </v-toolbar>
         <v-card-text>
-          <current-timer :elapsed-time="timer"></current-timer>
+          <timer :timer-status="timerStatus"></timer>
 
           <recordings-list
             v-model="selected"
             :recordings="audios"
           ></recordings-list>
+
+          <ul v-if="recordings.length">
+            <li v-for="(audio, index) in recordings" :key="index">
+              <audio :src="audio" controls></audio>
+            </li>
+          </ul>
 
           selected: {{ selected }}
         </v-card-text>
@@ -50,10 +60,8 @@
 </template>
 
 <script>
-import { WebAudioRecorder } from 'web-audio-recorder-js-webpack'
-
 import RecordingsList from '@/components/RecordingsList'
-import CurrentTimer from '@/components/CurrentTimer'
+import Timer from '@/components/Timer'
 
 const ENCODING_TYPE = 'mp3'
 const ENCODE_AFTER_RECORD = true
@@ -61,95 +69,51 @@ const ENCODE_AFTER_RECORD = true
 export default {
   components: {
     RecordingsList,
-    CurrentTimer
+    Timer
   },
   data() {
     return {
-      availableDevices: [],
-      selectedDevice: null,
-      logData: '',
       isRecording: false,
       audios: [
-        { duration: '01:45' },
-        { duration: '01:23' },
-        { duration: '00:21' }
+        { isPlaying: false, duration: '01:45', volume: 50 },
+        { isPlaying: false, duration: '01:23', volume: 50 },
+        { isPlaying: false, duration: '00:21', volume: 50 },
+        { isPlaying: false, duration: '00:13', volume: 50 }
       ],
       getUserMediaStream: null,
       recorder: null,
       input: null,
       audioContext: null,
       selected: null,
-      timer: null
+      timerStatus: 'stopped',
+      recordings: []
     }
   },
-  async created() {
-    if (navigator && navigator.mediaDevices) {
-      const mediaDevices = await navigator.mediaDevices.getUserMedia({
-        audio: true
-      })
-
-      if (mediaDevices) {
-        const devices = await navigator.mediaDevices.enumerateDevices()
-
-        this.availableDevices = devices.filter(
-          (device) => device.kind === 'audioinput'
-        )
-      }
-    }
+  created() {
+    console.log(typeof WebAudioRecorder)
   },
   methods: {
     toggleRecorder() {
       this.isRecording = !this.isRecording
-      this.toggleTimer()
-    },
-    toggleTimer() {
-      if (this.isRunning) {
-        clearInterval(this.interval)
-        console.log('timer stops')
+      this.timerStatus = this.isRecording ? 'started' : 'stopped'
+      if (this.isRecording) {
+        this.startRecording()
       } else {
-        this.interval = setInterval(this.incrementTime, 1000)
+        this.stopRecording()
       }
-      this.isRunning = !this.isRunning
     },
-    incrementTime() {
-      this.timer = +this.timer + 1
-    },
-    stopTimer() {
-      this.timer = 0
-    },
-    inputChanged() {
-      // console.log('input changed')
-      if (this.getUserMediaStream) {
-      }
-      navigator.mediaDevices.getUserMedia({
-        audio: true,
-        deviceId: {
-          exact: this.selectedDevice
-        }
-      })
+    cancelRecording() {
+      this.timerStatus = 'stopped'
+      this.isRecording = false
     },
     startRecording() {
-      if (navigator.mediaDevices) {
-        console.warn(
-          'about to start recording using',
-          this.availableDevices.find((d) => d.deviceId === this.selectedDevice)
-        )
-
+      if (navigator && navigator.mediaDevices) {
         navigator.mediaDevices
           .getUserMedia({
-            audio: true,
-            deviceId: {
-              exact: this.selectedDevice
-            }
+            audio: true
           })
           .then((stream) => {
-            navigator.mediaDevices.enumerateDevices().then((devices) => {
-              this.availableDevices = devices.filter(
-                (device) => device.kind === 'audioinput'
-              )
-            })
-
-            this.log(
+            console.warn(
               'getUserMedia() success, stream created, initializing WebAudioRecorder...'
             )
 
@@ -162,27 +126,28 @@ export default {
             /* use the stream */
             this.input = this.audioContext.createMediaStreamSource(stream)
 
-            this.recorder = new WebAudioRecorder(this.input, {
-              workerDir: 'js/web-audio-recorder-js-master/lib-minified/',
+            this.recorder = new window.WebAudioRecorder(this.input, {
+              workerDir: 'js/WebAudioRecorder/',
               encoding: ENCODING_TYPE,
               onEncoderLoading: (recorder, encoding) => {
                 // show "loading encoder..." display
-                this.log('Loading ' + encoding + ' encoder...')
+                console.warn('Loading ' + encoding + ' encoder...')
               },
               onEncoderLoaded: (recorder, encoding) => {
                 // hide "loading encoder..." display
-                this.log(encoding + ' encoder loaded')
+                console.warn(encoding + ' encoder loaded')
               },
               onComplete: (recorder, blob) => {
-                this.log('Encoding complete')
+                console.warn('Encoding complete')
                 const url = URL.createObjectURL(blob)
-                this.audios.push(url)
+                console.log(blob)
+                this.recordings.push(url)
                 // createDownloadLink(blob, recorder.encoding);
               }
             })
 
             this.recorder.setOptions({
-              timeLimit: 300,
+              timeLimit: 60,
               encodeAfterRecord: ENCODE_AFTER_RECORD,
               mp3: {
                 bitRate: 160
@@ -190,7 +155,7 @@ export default {
             })
 
             this.recorder.startRecording()
-            this.log('Recording started')
+            console.warn('Recording started')
             this.isRecording = true
           })
           .catch((err) => {
@@ -200,8 +165,7 @@ export default {
     },
     stopRecording() {
       this.isRecording = false
-
-      this.stopTimer()
+      this.timerStatus = 'stopped'
 
       //   // stop microphone access
       //   //! can't do this, otherwise can't record further notes
@@ -209,15 +173,20 @@ export default {
       //   // see https://blog.addpipe.com/using-webaudiorecorder-js-to-record-audio-on-your-website/
       //   // I don't understand why they initialize the recording object
       //   // every single time a new recording is started 🤔
-      //   this.getUserMediaStream.getAudioTracks()[0].stop()
+      this.getUserMediaStream.getAudioTracks()[0].stop()
 
-      //   // tell the recorder to finish the recording (stop recording + encode the recorded audio)
-      //   this.recorder.finishRecording()
-      //   this.log('Recording stopped')
+      // tell the recorder to finish the recording (stop recording + encode the recorded audio)
+      this.recorder.finishRecording()
+      console.warn('Recording stopped')
       // },
       // log(event) {
-      //   this.logData += event + `<br>`
+      //   console.warnData += event + `<br>`
       // }
+    }
+  },
+  head() {
+    return {
+      script: [{ src: '/WebAudioRecorder.js', defer: true }]
     }
   }
 }
