@@ -36,11 +36,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.v-application--is-ltr .v-list-item__action:last-of-type:not(:only-child),
-.v-application--is-ltr .v-list-item__avatar:last-of-type:not(:only-child),
-.v-application--is-ltr .v-list-item__icon:last-of-type:not(:only-child) {
-  margin-left: 0;
-}
-</style>

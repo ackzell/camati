@@ -11,16 +11,19 @@
         Recording {{ index + 1 }}
       </v-list-item-title>
       <v-slider
-        value="45"
+        :value="progress"
         active
         color="primary lighten-4"
         rounded
         inverse-label
-        :label="timeAndDuration"
+        :label="`${elapsedTime} / ${totalTime}`"
+        @change="seek"
+        @start="sliderConnected = false"
+        @end="sliderConnected = true"
       />
     </v-list-item-content>
     <v-list-item-action>
-      <v-btn icon color="primary darken-3" @click.stop>
+      <v-btn icon x-small color="primary darken-3">
         <v-icon>mdi-download</v-icon>
       </v-btn>
     </v-list-item-action>
@@ -32,6 +35,20 @@
   </v-list-item>
 </template>
 <script>
+function getMMSS(duration) {
+  let minutes = Math.floor(duration / 60)
+  let seconds = parseInt(duration, 10) - minutes * 60
+
+  if (minutes < 10) {
+    minutes = '0' + minutes
+  }
+  if (seconds < 10) {
+    seconds = '0' + seconds
+  }
+
+  return `${minutes}:${seconds}`
+}
+
 export default {
   props: {
     recording: {
@@ -50,21 +67,15 @@ export default {
     return {
       track: null,
       isPlaying: false,
-      totalDuration: null
+      totalDuration: null,
+      elapsedTime: `00:00`,
+      progress: 0,
+      sliderConnected: true
     }
   },
   computed: {
-    timeAndDuration() {
-      let minutes = Math.floor(this.totalDuration / 60)
-      let seconds = parseInt(this.totalDuration, 10) - minutes * 60
-
-      if (minutes < 10) {
-        minutes = '0' + minutes
-      }
-      if (seconds < 10) {
-        seconds = '0' + seconds
-      }
-      return `00:00 / ${minutes}:${seconds}`
+    totalTime() {
+      return getMMSS(this.totalDuration)
     }
   },
   beforeMount() {
@@ -80,6 +91,15 @@ export default {
       console.log('ended!')
       this.isPlaying = false
     })
+
+    this.track.addEventListener('timeupdate', (event) => {
+      const s = parseInt(this.track.currentTime % 60)
+      this.elapsedTime = getMMSS(s)
+
+      if (this.sliderConnected) {
+        this.progress = (this.track.currentTime * 100) / this.track.duration
+      }
+    })
   },
   methods: {
     toggleAudio() {
@@ -88,6 +108,13 @@ export default {
         this.track.play()
       } else {
         this.track.pause()
+      }
+    },
+    seek(payload) {
+      if (typeof payload === 'number') {
+        console.log('endseeking', payload)
+        console.log((payload * this.track.duration) / 100)
+        this.track.currentTime = (payload * this.track.duration) / 100
       }
     }
   }
