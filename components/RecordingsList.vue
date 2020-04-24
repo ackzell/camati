@@ -6,41 +6,7 @@
       @change="$emit('input', selected)"
     >
       <div v-for="(recording, index) in recordings" :key="index">
-        <v-list-item :ripple="false">
-          <v-list-item-avatar>
-            <v-btn
-              x-large
-              icon
-              @click="recording.isPlaying = !recording.isPlaying"
-            >
-              <v-icon v-if="recording.isPlaying">mdi-pause</v-icon>
-              <v-icon v-else>mdi-play</v-icon>
-            </v-btn>
-          </v-list-item-avatar>
-          <v-list-item-content>
-            <v-list-item-title class="overline">
-              Recording {{ index + 1 }}
-            </v-list-item-title>
-            <v-slider
-              value="45"
-              active
-              color="primary lighten-4"
-              rounded
-              inverse-label
-              :label="`00:00 / ${recording.duration}`"
-            />
-          </v-list-item-content>
-          <v-list-item-action>
-            <v-btn icon color="primary darken-3" @click.stop>
-              <v-icon>mdi-download</v-icon>
-            </v-btn>
-          </v-list-item-action>
-          <v-list-item-action>
-            <v-btn icon x-small>
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </v-list-item-action>
-        </v-list-item>
+        <recording-item :recording="recording" :index="index"></recording-item>
         <v-divider v-show="index != recordings.length - 1" inset></v-divider>
       </div>
     </v-list-item-group>
@@ -48,7 +14,11 @@
 </template>
 
 <script>
+import RecordingItem from '@/components/RecordingItem'
 export default {
+  components: {
+    RecordingItem
+  },
   props: {
     value: {
       type: Number,
