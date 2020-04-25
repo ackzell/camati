@@ -28,6 +28,7 @@
           <timer :timer-status="timerStatus"></timer>
 
           <recordings-list
+            v-if="recordings.length"
             v-model="selected"
             :recordings="recordings"
           ></recordings-list>
@@ -77,7 +78,8 @@ export default {
       audioContext: null,
       selected: null,
       timerStatus: 'stopped',
-      recordings: []
+      recordings: [],
+      count: 0
     }
   },
   created() {
@@ -131,9 +133,14 @@ export default {
               onComplete: (recorder, blob) => {
                 console.warn('Encoding complete')
                 const url = URL.createObjectURL(blob)
-                console.log(blob)
-                this.recordings.push({ audio: url })
-                // createDownloadLink(blob, recorder.encoding);
+                // the url already gives us a unique id, so we might as well use that :D
+                const id = url.split('3333/')[1]
+                this.recordings.push({
+                  number: ++this.count,
+                  id,
+                  audio: url,
+                  encoding: ENCODING_TYPE
+                })
               }
             })
 

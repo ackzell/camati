@@ -5,9 +5,15 @@
       mandatory
       @change="$emit('input', selected)"
     >
-      <div v-for="(recording, index) in recordings" :key="index">
-        <recording-item :recording="recording" :index="index"></recording-item>
-        <v-divider v-show="index != recordings.length - 1" inset></v-divider>
+      <div v-for="(recording, index) in recordingsInternal" :key="recording.id">
+        <recording-item
+          :recording="recording"
+          @remove-item="remove(recording.id)"
+        ></recording-item>
+        <v-divider
+          v-show="index != recordingsInternal.length - 1"
+          inset
+        ></v-divider>
       </div>
     </v-list-item-group>
   </v-list>
@@ -31,7 +37,18 @@ export default {
   },
   data() {
     return {
-      selected: this.selectedItem
+      selected: this.selectedItem,
+      recordingsInternal: this.recordings
+    }
+  },
+  methods: {
+    remove(id) {
+      console.log(id)
+      const index = this.recordings.findIndex(
+        (recording) => recording.id === id
+      )
+
+      this.recordingsInternal.splice(index, 1)
     }
   }
 }
