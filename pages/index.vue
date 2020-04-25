@@ -28,15 +28,10 @@
           <timer :timer-status="timerStatus"></timer>
 
           <recordings-list
+            v-if="recordings.length"
             v-model="selected"
-            :recordings="audios"
+            :recordings="recordings"
           ></recordings-list>
-
-          <ul v-if="recordings.length">
-            <li v-for="(audio, index) in recordings" :key="index">
-              <audio :src="audio" controls></audio>
-            </li>
-          </ul>
 
           selected: {{ selected }}
         </v-card-text>
@@ -52,7 +47,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" :disabled="!audios.length">Send it!</v-btn>
+          <v-btn color="primary" :disabled="!recordings.length && !selected"
+            >Send it!</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-col>
@@ -65,6 +62,7 @@ import Timer from '@/components/Timer'
 
 const ENCODING_TYPE = 'mp3'
 const ENCODE_AFTER_RECORD = true
+const TIME_LIMIT = 180
 
 export default {
   components: {
@@ -74,19 +72,14 @@ export default {
   data() {
     return {
       isRecording: false,
-      audios: [
-        { isPlaying: false, duration: '01:45', volume: 50 },
-        { isPlaying: false, duration: '01:23', volume: 50 },
-        { isPlaying: false, duration: '00:21', volume: 50 },
-        { isPlaying: false, duration: '00:13', volume: 50 }
-      ],
       getUserMediaStream: null,
       recorder: null,
       input: null,
       audioContext: null,
       selected: null,
       timerStatus: 'stopped',
-      recordings: []
+      recordings: [],
+      count: 0
     }
   },
   created() {
@@ -140,14 +133,19 @@ export default {
               onComplete: (recorder, blob) => {
                 console.warn('Encoding complete')
                 const url = URL.createObjectURL(blob)
-                console.log(blob)
-                this.recordings.push(url)
-                // createDownloadLink(blob, recorder.encoding);
+                // the url already gives us a unique id, so we might as well use that :D
+                const id = url.split('3333/')[1]
+                this.recordings.push({
+                  number: ++this.count,
+                  id,
+                  audio: url,
+                  encoding: ENCODING_TYPE
+                })
               }
             })
 
             this.recorder.setOptions({
-              timeLimit: 60,
+              timeLimit: TIME_LIMIT,
               encodeAfterRecord: ENCODE_AFTER_RECORD,
               mp3: {
                 bitRate: 160
