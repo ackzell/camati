@@ -4,10 +4,16 @@
       <span class="overline mr-1">Recording {{ recording.number }}</span>
     </div>
     <v-list-item-avatar>
-      <v-btn x-large icon @click="toggleAudio">
-        <v-icon v-if="isPlaying">mdi-pause</v-icon>
-        <v-icon v-else>mdi-play</v-icon>
-      </v-btn>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn x-large icon @click="toggleAudio" v-on="on">
+            <v-icon v-if="isPlaying">mdi-pause</v-icon>
+            <v-icon v-else>mdi-play</v-icon>
+          </v-btn>
+        </template>
+        <span v-if="isPlaying">Pause</span>
+        <span v-else>Play</span>
+      </v-tooltip>
     </v-list-item-avatar>
     <v-list-item-content class="px-5">
       <v-slider
@@ -24,26 +30,40 @@
     <div class="caption mr-5 ml-3 ">
       <span> {{ elapsedTime }} / {{ totalDuration }} </span>
     </div>
+
     <v-list-item-action>
-      <v-btn
-        icon
-        x-small
-        color="primary darken-3"
-        :href="href"
-        :download="download"
-      >
-        <v-icon>mdi-download</v-icon>
-      </v-btn>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            icon
+            x-small
+            color="primary darken-3"
+            :href="href"
+            :download="download"
+            v-on="on"
+          >
+            <v-icon>mdi-download</v-icon>
+          </v-btn>
+        </template>
+        <span>Download</span>
+      </v-tooltip>
     </v-list-item-action>
+
     <v-list-item-action>
-      <v-btn
-        icon
-        x-small
-        color="primary lighten-3"
-        @click="$emit('remove-item', recording.id)"
-      >
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            icon
+            x-small
+            color="primary lighten-3"
+            @click="$emit('remove-item', recording.id)"
+            v-on="on"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </template>
+        <span>Remove</span>
+      </v-tooltip>
     </v-list-item-action>
   </v-list-item>
 </template>

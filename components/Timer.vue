@@ -1,5 +1,13 @@
 <template>
-  <p class="display-2 text-center">{{ minutes }}</p>
+  <p
+    class="display-2 text-center"
+    :class="{
+      'yellow--text': remainingTime > 5 && remainingTime <= 10,
+      'red--text': remainingTime > 0 && remainingTime <= 5
+    }"
+  >
+    {{ minutes }}
+  </p>
 </template>
 
 <script>
@@ -8,19 +16,23 @@ export default {
     timerStatus: {
       type: String,
       default: 'stopped' // 'started'
+    },
+    timeLimit: {
+      type: Number,
+      default: 60
     }
   },
   data() {
     return {
-      elapsedTime: 0,
+      remainingTime: this.timeLimit,
       interval: null,
       isRunning: false
     }
   },
   computed: {
     minutes() {
-      let minutes = Math.floor(this.elapsedTime / 60)
-      let seconds = this.elapsedTime - minutes * 60
+      let minutes = Math.floor(this.remainingTime / 60)
+      let seconds = this.remainingTime - minutes * 60
 
       if (minutes < 10) {
         minutes = '0' + minutes
@@ -52,11 +64,14 @@ export default {
       this.isRunning = !this.isRunning
     },
     incrementTime() {
-      this.elapsedTime = +this.elapsedTime + 1
+      this.remainingTime = --this.remainingTime
+      if (this.remainingTime > this.timeLimit) {
+        this.stopTimer()
+      }
     },
     stopTimer() {
       // reset the count
-      this.elapsedTime = 0
+      this.remainingTime = this.timeLimit
       // and reset the timer
       clearInterval(this.interval)
       this.isRunning = false

@@ -5,7 +5,7 @@
   "author": "ackzell",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
+    "dev": "cross-env NUXT_HOST=0.0.0.0 NUXT_PORT=3333 nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
@@ -35,6 +35,7 @@
     "@vue/test-utils": "^1.0.0-beta.27",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.1.0",
+    "cross-env": "^7.0.2",
     "eslint": "^6.1.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-nuxt": ">=0.4.2",
@@ -45,11 +46,5 @@
     "prettier": "^1.19.1",
     "stylelint": "^10.1.0",
     "vue-jest": "^4.0.0-0"
-  },
-  "config": {
-    "nuxt": {
-      "host": "localhost",
-      "port": "33333"
-    }
   }
 }

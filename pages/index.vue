@@ -10,22 +10,40 @@
           <v-spacer></v-spacer>
 
           <!-- Start  / Finish recording -->
-          <v-btn
-            :color="isRecording ? 'red' : 'primary darken-2'"
-            @click="toggleRecorder"
-          >
-            <v-icon dark>{{
-              isRecording ? 'mdi-stop' : 'mdi-microphone'
-            }}</v-icon>
-          </v-btn>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                :color="isRecording ? 'red' : 'primary darken-2'"
+                :disabled="recordings.length === 3"
+                @click="toggleRecorder"
+                v-on="on"
+              >
+                <v-icon dark>{{
+                  isRecording ? 'mdi-stop' : 'mdi-microphone'
+                }}</v-icon>
+              </v-btn>
+            </template>
+            <span v-if="!isRecording">Start recording</span>
+            <span v-else>Finish recording</span>
+          </v-tooltip>
 
           <!-- discard recording -->
-          <v-btn icon :disabled="!isRecording" @click="cancelRecording">
-            <v-icon small>mdi-delete</v-icon>
-          </v-btn>
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on }">
+              <v-btn
+                icon
+                :disabled="!isRecording"
+                @click="cancelRecording"
+                v-on="on"
+              >
+                <v-icon small>mdi-delete</v-icon>
+              </v-btn>
+            </template>
+            <span>Discard recording</span>
+          </v-tooltip>
         </v-toolbar>
         <v-card-text>
-          <timer :timer-status="timerStatus"></timer>
+          <timer :timer-status="timerStatus" :time-limit="TIME_LIMIT"></timer>
 
           <recordings-list
             v-if="recordings.length"
@@ -62,7 +80,6 @@ import Timer from '@/components/Timer'
 
 const ENCODING_TYPE = 'mp3'
 const ENCODE_AFTER_RECORD = true
-const TIME_LIMIT = 180
 
 export default {
   components: {
@@ -79,7 +96,8 @@ export default {
       selected: null,
       timerStatus: 'stopped',
       recordings: [],
-      count: 0
+      count: 0,
+      TIME_LIMIT: 20
     }
   },
   created() {
@@ -141,11 +159,12 @@ export default {
                   audio: url,
                   encoding: ENCODING_TYPE
                 })
-              }
+              },
+              onTimeout: this.stopRecording
             })
 
             this.recorder.setOptions({
-              timeLimit: TIME_LIMIT,
+              timeLimit: this.TIME_LIMIT,
               encodeAfterRecord: ENCODE_AFTER_RECORD,
               mp3: {
                 bitRate: 160
