@@ -97,7 +97,7 @@ export default {
       timerStatus: 'stopped',
       recordings: [],
       count: 0,
-      TIME_LIMIT: 20
+      TIME_LIMIT: 60
     }
   },
   created() {
