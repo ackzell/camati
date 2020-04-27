@@ -9,6 +9,7 @@ export default {
   //     cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
   //   }
   // },
+  serverMiddleware: ['~/api/storeFile'],
   mode: 'spa',
   /*
    ** Headers of the page
