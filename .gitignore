@@ -92,3 +92,6 @@ sw.*
 # local https
 *.crt
 *.key
+
+# lambda built functions
+/lambda
