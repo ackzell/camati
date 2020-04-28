@@ -1,4 +1,3 @@
-// const { MongoClient } = require('mongodb')
 import { MongoClient } from 'mongodb'
 
 exports.handler = function(event, context, callback) {

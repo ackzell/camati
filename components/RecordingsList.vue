@@ -3,7 +3,12 @@
     <v-list-item-group
       v-model="selected"
       mandatory
-      @change="$emit('input', selected)"
+      @change="
+        $emit(
+          'input',
+          recordingsInternal[selected] ? recordingsInternal[selected].id : null
+        )
+      "
     >
       <div v-for="(recording, index) in recordingsInternal" :key="recording.id">
         <recording-item
@@ -27,7 +32,7 @@ export default {
   },
   props: {
     value: {
-      type: Number,
+      type: String,
       default: null
     },
     recordings: {
@@ -37,17 +42,18 @@ export default {
   },
   data() {
     return {
-      selected: this.selectedItem,
+      selected: null,
       recordingsInternal: this.recordings
     }
   },
   methods: {
     remove(id) {
-      console.log(id)
       const index = this.recordings.findIndex(
         (recording) => recording.id === id
       )
-
+      if (this.selected === index) {
+        this.$emit('input', null)
+      }
       this.recordingsInternal.splice(index, 1)
     }
   }

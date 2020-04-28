@@ -11,7 +11,8 @@
     "generate": "nuxt generate",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
     "test": "jest",
-    "deploy": "nuxt build; netlify-lambda build functions"
+    "deploy": "nuxt build; netlify-lambda build functions",
+    "fn": "netlify-lambda serve functions"
   },
   "lint-staged": {
     "*.{js,vue}": "npm run lint",

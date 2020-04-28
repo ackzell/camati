@@ -47,17 +47,16 @@
 
           <recordings-list
             v-if="recordings.length"
-            v-model="selected"
+            v-model="selectedRecording"
             :recordings="recordings"
           ></recordings-list>
-
-          selected: {{ selected }}
         </v-card-text>
       </v-card>
 
       <v-card class="mt-4">
         <v-card-text>
           <v-text-field
+            v-model="name"
             name="name"
             label="Your Name"
             single-line
@@ -65,7 +64,10 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" :disabled="!recordings.length && !selected"
+          <v-btn
+            color="primary"
+            :disabled="!selectedRecording || !name"
+            @click="sendRecording"
             >Send it!</v-btn
           >
         </v-card-actions>
@@ -93,15 +95,13 @@ export default {
       recorder: null,
       input: null,
       audioContext: null,
-      selected: null,
+      selectedRecording: null,
       timerStatus: 'stopped',
       recordings: [],
       count: 0,
-      TIME_LIMIT: 60
+      TIME_LIMIT: 60,
+      name: ''
     }
-  },
-  created() {
-    console.log(typeof WebAudioRecorder)
   },
   methods: {
     toggleRecorder() {
@@ -153,13 +153,15 @@ export default {
                 const url = URL.createObjectURL(blob)
                 // the url already gives us a unique id, so we might as well use that :D
                 const id = url.split('3333/')[1]
-                this.recordings.push({
+                const recording = {
                   number: ++this.count,
                   id,
                   audio: url,
                   encoding: ENCODING_TYPE
-                })
+                }
+                this.recordings.push(recording)
               },
+              // stop the recording when time is up
               onTimeout: this.stopRecording
             })
 
@@ -184,21 +186,16 @@ export default {
       this.isRecording = false
       this.timerStatus = 'stopped'
 
-      //   // stop microphone access
-      //   //! can't do this, otherwise can't record further notes
-
-      //   // see https://blog.addpipe.com/using-webaudiorecorder-js-to-record-audio-on-your-website/
-      //   // I don't understand why they initialize the recording object
-      //   // every single time a new recording is started 🤔
+      // stop microphone access
+      // see https://blog.addpipe.com/using-webaudiorecorder-js-to-record-audio-on-your-website/
       this.getUserMediaStream.getAudioTracks()[0].stop()
 
       // tell the recorder to finish the recording (stop recording + encode the recorded audio)
       this.recorder.finishRecording()
       console.warn('Recording stopped')
-      // },
-      // log(event) {
-      //   console.warnData += event + `<br>`
-      // }
+    },
+    sendRecording() {
+      console.log(this.selectedRecording)
     }
   },
   head() {

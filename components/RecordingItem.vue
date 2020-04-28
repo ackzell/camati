@@ -113,13 +113,10 @@ export default {
     }`
 
     this.track.addEventListener('loadeddata', () => {
-      console.log('finished loading')
-      console.log(this.track.duration)
       this.totalDuration = getMMSS(this.track.duration)
     })
 
     this.track.addEventListener('ended', () => {
-      console.log('ended!')
       this.isPlaying = false
     })
 
@@ -142,9 +139,7 @@ export default {
       }
     },
     seek(payload) {
-      if (typeof payload === 'number') {
-        this.track.currentTime = (payload * this.track.duration) / 100
-      }
+      this.track.currentTime = (payload * this.track.duration) / 100
     }
   }
 }
