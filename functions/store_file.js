@@ -1,9 +1,9 @@
-import { MongoClient } from 'mongodb'
+// import { MongoClient } from 'mongodb'
 
 exports.handler = function(event, context, callback) {
-  const DB_URL = process.env.DB_URL
-  const DB_NAME = process.env.DB_NAME
-  const DB_COLLECTION = process.env.DB_COLLECTION
+  // const DB_URL = process.env.DB_URL
+  // const DB_NAME = process.env.DB_NAME
+  // const DB_COLLECTION = process.env.DB_COLLECTION
   // event and context provided by Netlify
   // callback provided by us
 
@@ -19,41 +19,40 @@ exports.handler = function(event, context, callback) {
       }
    */
 
-  MongoClient.connect(
-    `${DB_URL}/${DB_NAME}`,
-    { useUnifiedTopology: true },
-    function(err, connection) {
-      if (err) {
-        console.log('Error while connecting', err)
-        callback(null, {
-          statusCode: 500,
-          body: JSON.stringify({ error: err })
-        })
-      }
+  if (event.httpMethod === 'POST') {
+    console.log(event.body)
 
-      const db = connection.db(DB_NAME)
-      const audiosCollection = db.collection(DB_COLLECTION)
+    // MongoClient.connect(
+    //   `${DB_URL}/${DB_NAME}`,
+    //   { useUnifiedTopology: true },
+    //   function(err, connection) {
+    //     if (err) {
+    //       console.log('Error while connecting', err)
+    //       callback(null, {
+    //         statusCode: 500,
+    //         body: JSON.stringify({ error: err })
+    //       })
+    //     }
 
-      audiosCollection
-        .insertOne({ hallo: 'Welt' })
-        .then(
-          (result) => {
-            callback(null, { statusCode: 200, body: JSON.stringify(result) })
-          },
-          (err) => {
-            console.log(err)
-            callback(null, { statusCode: 501, body: 'Could not insert' })
-          }
-        )
-        .finally(() => connection.close())
+    //     const db = connection.db(DB_NAME)
+    //     const audiosCollection = db.collection(DB_COLLECTION)
 
-      // audiosCollection.insertOne({ hello: 'world' }).then((result) => {
-      //   console.log(result)
-      //   callback(null, {
-      //     statusCode: 200,
-      //     body: JSON.stringify(result)
-      //   })
-      // })
-    }
-  )
+    //     audiosCollection
+    //       .insertOne({ hallo: 'Welt' })
+    //       .then(
+    //         (result) => {
+    //           callback(null, { statusCode: 200, body: JSON.stringify(result) })
+    //         },
+    //         (err) => {
+    //           console.log(err)
+    //           callback(null, { statusCode: 501, body: 'Could not insert' })
+    //         }
+    //       )
+    //       .finally(() => connection.close())
+    //   }
+    // )
+  }
+
+  console.log(event)
+  callback(null, { statusCode: 501, body: 'Could not insert' })
 }

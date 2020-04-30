@@ -1,6 +1,6 @@
 <template>
   <v-row align="center" justify="center">
-    <v-col cols="12" sm="8" md="4">
+    <v-col cols="8">
       <p class="caption text-right">
         You can record a quick message (up to 1 min) and send it to us!
       </p>
@@ -100,7 +100,8 @@ export default {
       recordings: [],
       count: 0,
       TIME_LIMIT: 60,
-      name: ''
+      name: '',
+      blob: null
     }
   },
   methods: {
@@ -150,9 +151,10 @@ export default {
               },
               onComplete: (recorder, blob) => {
                 console.warn('Encoding complete')
+                this.blob = blob
                 const url = URL.createObjectURL(blob)
                 // the url already gives us a unique id, so we might as well use that :D
-                const id = url.split('3333/')[1]
+                const id = url.split('3000/')[1]
                 const recording = {
                   number: ++this.count,
                   id,
@@ -195,7 +197,24 @@ export default {
       console.warn('Recording stopped')
     },
     sendRecording() {
-      console.log(this.selectedRecording)
+      const oReq = new XMLHttpRequest()
+      oReq.open('POST', '/.netlify/functions/store_file', true)
+      oReq.onload = function(oEvent) {
+        // Uploaded.
+        console.log('uploaded')
+      }
+
+      const blob = new Blob(this.blob, { type: 'text/plain' })
+
+      oReq.send(blob)
+
+      // console.log(process.env)
+
+      // const oReq = new XMLHttpRequest()
+      // oReq.open('GET', '/.netlify/functions/store_file')
+      // oReq.onload = function(response) {}
+
+      // oReq.send()
     }
   },
   head() {

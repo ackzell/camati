@@ -1,14 +1,19 @@
-// import path from 'path'
-// import fs from 'fs'
+import path from 'path'
+import fs from 'fs'
 import colors from 'vuetify/es5/util/colors'
+let server = {}
+if (process.env.NODE_ENV === 'development') {
+  server = {
+    host: '0.0.0.0',
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
+    }
+  }
+}
 
 export default {
-  // server: {
-  //   https: {
-  //     key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
-  //     cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
-  //   }
-  // },
+  server,
   mode: 'spa',
   /*
    ** Headers of the page
@@ -83,7 +88,8 @@ export default {
           success: colors.green.accent3
         }
       }
-    }
+    },
+    treeShake: true
   },
   /*
    ** Build configuration
@@ -92,15 +98,6 @@ export default {
     /*
      ** You can extend webpack config here
      */
-    extend(config, ctx) {
-      config.node = {
-        fs: 'empty'
-      }
-
-      config.module.rules.push({
-        test: /(\.mem)$/,
-        loader: 'file-loader'
-      })
-    }
+    // extend(config, ctx) {}
   }
 }
