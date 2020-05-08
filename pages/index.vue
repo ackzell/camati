@@ -1,6 +1,6 @@
 <template>
   <v-row align="center" justify="center">
-    <v-col cols="12" sm="8" md="4">
+    <v-col cols="12" sm="8" lg="6">
       <p class="caption text-right">
         You can record a quick message (up to 1 min) and send it to us!
       </p>
@@ -14,7 +14,7 @@
             <template v-slot:activator="{ on }">
               <v-btn
                 :color="isRecording ? 'red' : 'primary darken-2'"
-                :disabled="recordings.length === 3"
+                :disabled="recordings.length === 3 || !canRecord"
                 @click="toggleRecorder"
                 v-on="on"
               >
@@ -92,6 +92,7 @@ export default {
   },
   data() {
     return {
+      canRecord: false,
       name: '',
       isRecording: false,
       getUserMediaStream: null,
@@ -106,7 +107,17 @@ export default {
     }
   },
   created() {
-    console.log(typeof WebAudioRecorder)
+    // get access to the mic
+    if (navigator && navigator.mediaDevices) {
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: true
+        })
+        .then((stream) => {
+          // and until we do, enable the recording button
+          this.canRecord = true
+        })
+    }
   },
   methods: {
     toggleRecorder() {
