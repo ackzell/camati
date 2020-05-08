@@ -58,6 +58,7 @@
       <v-card class="mt-4">
         <v-card-text>
           <v-text-field
+            v-model="name"
             name="name"
             label="Your Name"
             single-line
@@ -65,7 +66,10 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" :disabled="!recordings.length && !selected"
+          <v-btn
+            color="primary"
+            :disabled="!recordings.length && !selected"
+            @click="send"
             >Send it!</v-btn
           >
         </v-card-actions>
@@ -88,6 +92,7 @@ export default {
   },
   data() {
     return {
+      name: '',
       isRecording: false,
       getUserMediaStream: null,
       recorder: null,
@@ -151,14 +156,22 @@ export default {
               onComplete: (recorder, blob) => {
                 console.warn('Encoding complete')
                 const url = URL.createObjectURL(blob)
-                // the url already gives us a unique id, so we might as well use that :D
-                const id = url.split('3333/')[1]
+
                 this.recordings.push({
                   number: ++this.count,
-                  id,
+                  id: getId(url), // the url already gives us a unique id, so we might as well use that :D
                   audio: url,
+                  blob,
                   encoding: ENCODING_TYPE
                 })
+
+                function getId(url) {
+                  const href = url.replace('blob:', '')
+                  const parser = document.createElement('a')
+
+                  parser.href = href
+                  return parser.pathname.substring(1)
+                }
               },
               onTimeout: this.stopRecording
             })
@@ -184,21 +197,21 @@ export default {
       this.isRecording = false
       this.timerStatus = 'stopped'
 
-      //   // stop microphone access
-      //   //! can't do this, otherwise can't record further notes
-
-      //   // see https://blog.addpipe.com/using-webaudiorecorder-js-to-record-audio-on-your-website/
-      //   // I don't understand why they initialize the recording object
-      //   // every single time a new recording is started 🤔
       this.getUserMediaStream.getAudioTracks()[0].stop()
 
       // tell the recorder to finish the recording (stop recording + encode the recorded audio)
       this.recorder.finishRecording()
       console.warn('Recording stopped')
-      // },
-      // log(event) {
-      //   console.warnData += event + `<br>`
-      // }
+    },
+    send() {
+      const selectedTrack = this.recordings[this.selected]
+      const storageRef = this.$fireStorage.ref()
+      const audioRef = storageRef.child(`${this.name}-${selectedTrack.id}`)
+
+      audioRef.put(selectedTrack.blob).then((snapshot) => {
+        console.log(snapshot)
+        console.log('done!')
+      })
     }
   },
   head() {
