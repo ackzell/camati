@@ -19,4 +19,20 @@ $ npm run start
 $ npm run generate
 ```
 
-For detailed explanation on how things work, check out [Nuxt.js docs](https://nuxtjs.org).
+## Netlify 
+This repo is hooked up to a Netlify deployment. Every pull request from approved users will create an instance of the app which can be previewed.
+
+## Firebase
+To handle the uploads we are using the [storage solution from Firebase](https://firebase.google.com/docs/storage).
+You can hook up your own instance to test if you provide a `.env` file on the root of the folder with the following keys:
+
+```.env
+FIREBASE_API_KEY=******
+AUTH_DOMAIN=******
+DATABASE_URL=******
+PROJECT_ID=******
+STORAGE_BUCKET=******
+MESSAGING_SENDER_ID=******
+APP_ID=******
+```
+
