@@ -50,8 +50,6 @@
             v-model="selected"
             :recordings="recordings"
           ></recordings-list>
-
-          selected: {{ selected }}
         </v-card-text>
       </v-card>
 
@@ -67,12 +65,17 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn
+            large
             color="primary"
-            :disabled="!recordings.length && !selected"
+            :disabled="(!recordings.length && !selected) || sending"
             @click="send"
-            >Send it!</v-btn
+            >{{ sending ? 'Sending...' : 'Send it!' }}</v-btn
           >
         </v-card-actions>
+        <v-progress-linear
+          v-if="uploadProgress"
+          :value="uploadProgress"
+        ></v-progress-linear>
       </v-card>
     </v-col>
   </v-row>
@@ -103,7 +106,9 @@ export default {
       timerStatus: 'stopped',
       recordings: [],
       count: 0,
-      TIME_LIMIT: 60
+      TIME_LIMIT: 60,
+      sending: false,
+      uploadProgress: 0
     }
   },
   created() {
@@ -215,14 +220,28 @@ export default {
       console.warn('Recording stopped')
     },
     send() {
+      this.sending = true
       const selectedTrack = this.recordings[this.selected]
       const storageRef = this.$fireStorage.ref()
       const audioRef = storageRef.child(`${this.name}-${selectedTrack.id}`)
 
-      audioRef.put(selectedTrack.blob).then((snapshot) => {
-        console.log(snapshot)
-        console.log('done!')
-      })
+      const uploadTask = audioRef.put(selectedTrack.blob)
+
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          this.uploadProgress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        },
+        () => {
+          // error
+        },
+        () => {
+          // success
+          this.sending = false
+          this.uploadProgress = 0
+        }
+      )
     }
   },
   head() {

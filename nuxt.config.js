@@ -2,6 +2,8 @@
 // import fs from 'fs'
 import colors from 'vuetify/es5/util/colors'
 
+require('dotenv').config()
+
 export default {
   // server: {
   //   https: {
@@ -47,7 +49,8 @@ export default {
     '@nuxtjs/eslint-module',
     // Doc: https://github.com/nuxt-community/stylelint-module
     '@nuxtjs/stylelint-module',
-    '@nuxtjs/vuetify'
+    '@nuxtjs/vuetify',
+    '@nuxtjs/dotenv'
   ],
   /*
    ** Nuxt.js modules
@@ -57,7 +60,6 @@ export default {
     '@nuxtjs/axios',
     '@nuxtjs/pwa',
     // Doc: https://github.com/nuxt-community/dotenv-module
-    '@nuxtjs/dotenv',
     '@nuxtjs/firebase'
   ],
   /*
@@ -113,6 +115,7 @@ export default {
         fs: 'empty'
       }
 
+      // todo: is this needed still?
       config.module.rules.push({
         test: /(\.mem)$/,
         loader: 'file-loader'
