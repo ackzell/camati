@@ -1,6 +1,6 @@
 <template>
   <v-list-item :ripple="false">
-    <div class="mr-5">
+    <div class="mr-5 d-none d-sm-flex">
       <span class="overline mr-1">Recording {{ recording.number }}</span>
     </div>
     <v-list-item-avatar>
@@ -15,7 +15,7 @@
         <span v-else>Play</span>
       </v-tooltip>
     </v-list-item-avatar>
-    <v-list-item-content class="px-5">
+    <v-list-item-content>
       <v-slider
         active
         color="primary lighten-4"
@@ -25,13 +25,17 @@
         @change="seek"
         @start="sliderConnected = false"
         @end="sliderConnected = true"
-      />
-    </v-list-item-content>
-    <div class="caption mr-5 ml-3 ">
-      <span> {{ elapsedTime }} / {{ totalDuration }} </span>
-    </div>
+      >
+        <template v-slot:prepend>
+          <span class="caption">{{ elapsedTime }}</span>
+        </template>
 
-    <v-list-item-action>
+        <template v-slot:append>
+          <span class="caption">{{ totalDuration }}</span>
+        </template>
+      </v-slider>
+    </v-list-item-content>
+    <v-list-item-action-text class="ml-2">
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-btn
@@ -47,9 +51,9 @@
         </template>
         <span>Download</span>
       </v-tooltip>
-    </v-list-item-action>
+    </v-list-item-action-text>
 
-    <v-list-item-action>
+    <v-list-item-action-text>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
           <v-btn
@@ -64,7 +68,7 @@
         </template>
         <span>Remove</span>
       </v-tooltip>
-    </v-list-item-action>
+    </v-list-item-action-text>
   </v-list-item>
 </template>
 <script>
@@ -149,3 +153,11 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+.v-application--is-ltr .v-list-item__avatar:first-child {
+  margin-right: 8px;
+}
+.v-input__slider {
+  align-items: center;
+}
+</style>

@@ -43,7 +43,6 @@ export default {
   },
   methods: {
     remove(id) {
-      console.log(id)
       const index = this.recordings.findIndex(
         (recording) => recording.id === id
       )

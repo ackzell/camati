@@ -1,6 +1,6 @@
 <template>
   <v-row align="center" justify="center">
-    <v-col cols="12" sm="8" md="4">
+    <v-col cols="12" sm="8" lg="6">
       <p class="caption text-right">
         You can record a quick message (up to 1 min) and send it to us!
       </p>
@@ -14,7 +14,7 @@
             <template v-slot:activator="{ on }">
               <v-btn
                 :color="isRecording ? 'red' : 'primary darken-2'"
-                :disabled="recordings.length === 3"
+                :disabled="recordings.length === 3 || !canRecord"
                 @click="toggleRecorder"
                 v-on="on"
               >
@@ -50,14 +50,13 @@
             v-model="selected"
             :recordings="recordings"
           ></recordings-list>
-
-          selected: {{ selected }}
         </v-card-text>
       </v-card>
 
       <v-card class="mt-4">
         <v-card-text>
           <v-text-field
+            v-model="name"
             name="name"
             label="Your Name"
             single-line
@@ -65,10 +64,18 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" :disabled="!recordings.length && !selected"
-            >Send it!</v-btn
+          <v-btn
+            large
+            color="primary"
+            :disabled="(!recordings.length && !selected) || sending"
+            @click="send"
+            >{{ sending ? 'Sending...' : 'Send it!' }}</v-btn
           >
         </v-card-actions>
+        <v-progress-linear
+          v-if="uploadProgress"
+          :value="uploadProgress"
+        ></v-progress-linear>
       </v-card>
     </v-col>
   </v-row>
@@ -88,6 +95,8 @@ export default {
   },
   data() {
     return {
+      canRecord: false,
+      name: '',
       isRecording: false,
       getUserMediaStream: null,
       recorder: null,
@@ -97,11 +106,23 @@ export default {
       timerStatus: 'stopped',
       recordings: [],
       count: 0,
-      TIME_LIMIT: 60
+      TIME_LIMIT: 60,
+      sending: false,
+      uploadProgress: 0
     }
   },
   created() {
-    console.log(typeof WebAudioRecorder)
+    // get access to the mic
+    if (navigator && navigator.mediaDevices) {
+      navigator.mediaDevices
+        .getUserMedia({
+          audio: true
+        })
+        .then((stream) => {
+          // and until we do, enable the recording button
+          this.canRecord = true
+        })
+    }
   },
   methods: {
     toggleRecorder() {
@@ -151,14 +172,22 @@ export default {
               onComplete: (recorder, blob) => {
                 console.warn('Encoding complete')
                 const url = URL.createObjectURL(blob)
-                // the url already gives us a unique id, so we might as well use that :D
-                const id = url.split('3333/')[1]
+
                 this.recordings.push({
                   number: ++this.count,
-                  id,
+                  id: getId(url), // the url already gives us a unique id, so we might as well use that :D
                   audio: url,
+                  blob,
                   encoding: ENCODING_TYPE
                 })
+
+                function getId(url) {
+                  const href = url.replace('blob:', '')
+                  const parser = document.createElement('a')
+
+                  parser.href = href
+                  return parser.pathname.substring(1)
+                }
               },
               onTimeout: this.stopRecording
             })
@@ -184,21 +213,35 @@ export default {
       this.isRecording = false
       this.timerStatus = 'stopped'
 
-      //   // stop microphone access
-      //   //! can't do this, otherwise can't record further notes
-
-      //   // see https://blog.addpipe.com/using-webaudiorecorder-js-to-record-audio-on-your-website/
-      //   // I don't understand why they initialize the recording object
-      //   // every single time a new recording is started 🤔
       this.getUserMediaStream.getAudioTracks()[0].stop()
 
       // tell the recorder to finish the recording (stop recording + encode the recorded audio)
       this.recorder.finishRecording()
       console.warn('Recording stopped')
-      // },
-      // log(event) {
-      //   console.warnData += event + `<br>`
-      // }
+    },
+    send() {
+      this.sending = true
+      const selectedTrack = this.recordings[this.selected]
+      const storageRef = this.$fireStorage.ref()
+      const audioRef = storageRef.child(`${this.name}-${selectedTrack.id}`)
+
+      const uploadTask = audioRef.put(selectedTrack.blob)
+
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          this.uploadProgress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        },
+        () => {
+          // error
+        },
+        () => {
+          // success
+          this.sending = false
+          this.uploadProgress = 0
+        }
+      )
     }
   },
   head() {
