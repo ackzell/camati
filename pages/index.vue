@@ -6,7 +6,13 @@
       </p>
       <v-card class="elevation-12">
         <v-toolbar color="primary" flat>
-          <v-toolbar-title>VoiceMail</v-toolbar-title>
+          <img
+            src="@/assets/camati_logo.svg"
+            alt="camati_logo"
+            height="150%"
+            title="Camati"
+          />
+
           <v-spacer></v-spacer>
 
           <!-- Start  / Finish recording -->
