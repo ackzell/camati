@@ -1,6 +1,6 @@
 <template>
   <v-row align="center" justify="center">
-    <v-col cols="12" sm="8" lg="6">
+    <v-col cols="12" sm="8" lg="4">
       <p class="caption text-right">
         You can record a quick message (up to 1 min) and send it to us!
       </p>
@@ -67,7 +67,7 @@
           <v-btn
             large
             color="primary"
-            :disabled="(!recordings.length && !selected) || sending"
+            :disabled="(!recordings.length && !selected) || !name || sending"
             @click="send"
             >{{ sending ? 'Sending...' : 'Send it!' }}</v-btn
           >
@@ -78,6 +78,19 @@
         ></v-progress-linear>
       </v-card>
     </v-col>
+    <v-snackbar
+      v-model="snackbar"
+      :timeout="0"
+      top
+      :color="snackbarError ? 'red accent-4' : 'green darken-2'"
+      multi-line
+      vertical
+    >
+      <span v-html="snackbarText"></span>
+      <v-btn text @click="snackbar = false">
+        Close
+      </v-btn>
+    </v-snackbar>
   </v-row>
 </template>
 
@@ -108,7 +121,10 @@ export default {
       count: 0,
       TIME_LIMIT: 60,
       sending: false,
-      uploadProgress: 0
+      uploadProgress: 0,
+      snackbar: false,
+      snackbarText: '',
+      snackbarError: false
     }
   },
   created() {
@@ -220,10 +236,14 @@ export default {
       console.warn('Recording stopped')
     },
     send() {
+      this.snackbar = false
       this.sending = true
       const selectedTrack = this.recordings[this.selected]
       const storageRef = this.$fireStorage.ref()
-      const audioRef = storageRef.child(`${this.name}-${selectedTrack.id}`)
+      const today = new Date().toLocaleDateString('es-MX').replace(/\//g, '-')
+      const audioRef = storageRef.child(
+        `${today}/${this.name}-${selectedTrack.id}`
+      )
 
       const uploadTask = audioRef.put(selectedTrack.blob)
 
@@ -235,11 +255,18 @@ export default {
         },
         () => {
           // error
+          this.snackbar = true
+          this.snackbarError = true
+          this.snackbarText = 'There was an error, please try again 😖'
         },
         () => {
           // success
           this.sending = false
           this.uploadProgress = 0
+
+          this.snackbar = true
+          this.snackbarText =
+            "Your audio was uploaded! <br> We'll make sure to add it in the next available spot in the newsletter 😎"
         }
       )
     }
