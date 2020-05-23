@@ -45,11 +45,20 @@
         <v-card-text>
           <timer :timer-status="timerStatus" :time-limit="TIME_LIMIT"></timer>
 
-          <recordings-list
-            v-if="recordings.length"
-            v-model="selected"
-            :recordings="recordings"
-          ></recordings-list>
+          <v-card color="primary" height="190">
+            <recordings-list
+              v-if="recordings.length"
+              v-model="selected"
+              :recordings="recordings"
+            ></recordings-list>
+            <v-layout v-else fill-height align-center>
+              <v-flex>
+                <p class="text-center text--secondary mb-0">
+                  Recordings will appear here
+                </p>
+              </v-flex>
+            </v-layout>
+          </v-card>
         </v-card-text>
       </v-card>
 

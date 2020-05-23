@@ -1,7 +1,10 @@
 <template>
-  <v-list elevation="5" shaped color="primary">
-    <v-list-item-group
+  <v-list elevation="0" shaped color="primary">
+    <v-slide-y-transition
       v-model="selected"
+      tag="v-list-item-group"
+      class="py-0"
+      group
       mandatory
       @change="$emit('input', selected)"
     >
@@ -11,11 +14,11 @@
           @remove-item="remove(recording.id)"
         ></recording-item>
         <v-divider
-          v-show="index != recordingsInternal.length - 1"
+          v-if="index !== recordingsInternal.length - 1"
           inset
         ></v-divider>
       </div>
-    </v-list-item-group>
+    </v-slide-y-transition>
   </v-list>
 </template>
 
@@ -52,3 +55,8 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+.v-move {
+  transition: transform 1s;
+}
+</style>
