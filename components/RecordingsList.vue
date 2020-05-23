@@ -1,8 +1,7 @@
 <template>
   <v-list elevation="0" shaped color="primary">
-    <v-slide-y-transition
+    <v-list-item-group
       v-model="selected"
-      tag="v-list-item-group"
       class="py-0"
       group
       mandatory
@@ -18,7 +17,7 @@
           inset
         ></v-divider>
       </div>
-    </v-slide-y-transition>
+    </v-list-item-group>
   </v-list>
 </template>
 
@@ -31,7 +30,7 @@ export default {
   props: {
     value: {
       type: Number,
-      default: null
+      default: 0
     },
     recordings: {
       type: Array,
