@@ -7,16 +7,21 @@
       mandatory
       @change="$emit('input', selected)"
     >
-      <div v-for="(recording, index) in recordingsInternal" :key="recording.id">
-        <recording-item
-          :recording="recording"
-          @remove-item="remove(recording.id)"
-        ></recording-item>
-        <v-divider
-          v-if="index !== recordingsInternal.length - 1"
-          inset
-        ></v-divider>
-      </div>
+      <v-slide-y-transition group>
+        <div
+          v-for="(recording, index) in recordingsInternal"
+          :key="recording.id"
+        >
+          <recording-item
+            :recording="recording"
+            @remove-item="remove(recording.id)"
+          ></recording-item>
+          <v-divider
+            v-if="index !== recordingsInternal.length - 1"
+            inset
+          ></v-divider>
+        </div>
+      </v-slide-y-transition>
     </v-list-item-group>
   </v-list>
 </template>
