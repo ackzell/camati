@@ -226,6 +226,7 @@ export default {
       }
     },
     cancelRecording() {
+      this.recorder.cancelRecording()
       this.timerStatus = 'stopped'
       this.isRecording = false
     },
