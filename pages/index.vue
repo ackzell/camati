@@ -165,7 +165,7 @@ export default {
           /* use the stream */
           this.input = this.audioContext.createMediaStreamSource(stream)
 
-          this.recorder = new window.WebAudioRecorder(this.input, {
+          const options = {
             workerDir: 'js/WebAudioRecorder/',
             encoding: ENCODING_TYPE,
             onEncoderLoading: (recorder, encoding) => {
@@ -197,7 +197,13 @@ export default {
               }
             },
             onTimeout: this.stopRecording
-          })
+          }
+
+          try {
+            this.recorder = new window.WebAudioRecorder(this.input, options)
+          } catch (e) {
+            console.warn('Exception caught', e)
+          }
 
           this.recorder.setOptions({
             timeLimit: this.TIME_LIMIT,
