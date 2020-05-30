@@ -201,17 +201,17 @@ export default {
 
           try {
             this.recorder = new window.WebAudioRecorder(this.input, options)
+
+            this.recorder.setOptions({
+              timeLimit: this.TIME_LIMIT,
+              encodeAfterRecord: ENCODE_AFTER_RECORD,
+              mp3: {
+                bitRate: 160
+              }
+            })
           } catch (e) {
             console.warn('Exception caught', e)
           }
-
-          this.recorder.setOptions({
-            timeLimit: this.TIME_LIMIT,
-            encodeAfterRecord: ENCODE_AFTER_RECORD,
-            mp3: {
-              bitRate: 160
-            }
-          })
         })
     }
   },
