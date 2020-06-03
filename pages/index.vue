@@ -69,6 +69,13 @@
       </v-card>
 
       <v-card class="mt-4">
+        <v-banner>
+          Send recording:
+          <span v-if="recordings.length" class="overline">{{
+            `Recording ${selected + 1}`
+          }}</span>
+          <span v-else>None</span>
+        </v-banner>
         <v-card-text>
           <v-text-field
             v-model="name"
