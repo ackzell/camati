@@ -1,23 +1,15 @@
-// import path from 'path'
-// import fs from 'fs'
 import colors from 'vuetify/es5/util/colors'
 
 require('dotenv').config()
 
 export default {
-  // server: {
-  //   https: {
-  //     key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
-  //     cert: fs.readFileSync(path.resolve(__dirname, 'server.crt'))
-  //   }
-  // },
   mode: 'spa',
   /*
    ** Headers of the page
    */
   head: {
-    titleTemplate: '%s - ' + process.env.npm_package_name,
-    title: process.env.npm_package_name || '',
+    titleTemplate: '',
+    title: 'Camati - Tlazocamati means thank you',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },

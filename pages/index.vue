@@ -6,7 +6,13 @@
       </p>
       <v-card class="elevation-12">
         <v-toolbar color="primary" flat>
-          <v-toolbar-title>VoiceMail</v-toolbar-title>
+          <img
+            src="@/assets/camati_logo.svg"
+            alt="camati_logo"
+            height="150%"
+            title="Camati"
+          />
+
           <v-spacer></v-spacer>
 
           <!-- Start  / Finish recording -->
@@ -45,15 +51,31 @@
         <v-card-text>
           <timer :timer-status="timerStatus" :time-limit="TIME_LIMIT"></timer>
 
-          <recordings-list
-            v-if="recordings.length"
-            v-model="selected"
-            :recordings="recordings"
-          ></recordings-list>
+          <v-card color="primary" height="190">
+            <recordings-list
+              v-if="recordings.length"
+              v-model="selected"
+              :recordings="recordings"
+            ></recordings-list>
+            <v-layout v-else fill-height align-center>
+              <v-flex>
+                <p class="text-center text--secondary mb-0">
+                  Recordings will appear here
+                </p>
+              </v-flex>
+            </v-layout>
+          </v-card>
         </v-card-text>
       </v-card>
 
       <v-card class="mt-4">
+        <v-banner>
+          Send recording:
+          <span v-if="recordings.length" class="overline">{{
+            `Recording ${selected + 1}`
+          }}</span>
+          <span v-else>None</span>
+        </v-banner>
         <v-card-text>
           <v-text-field
             v-model="name"
@@ -86,6 +108,7 @@
       multi-line
       vertical
     >
+      <!-- eslint-disable-next-line -->
       <span v-html="snackbarText"></span>
       <v-btn text @click="snackbar = false">
         Close
@@ -127,7 +150,7 @@ export default {
       snackbarError: false
     }
   },
-  created() {
+  mounted() {
     // get access to the mic
     if (navigator && navigator.mediaDevices) {
       navigator.mediaDevices
@@ -137,6 +160,62 @@ export default {
         .then((stream) => {
           // and until we do, enable the recording button
           this.canRecord = true
+
+          console.warn(
+            'getUserMedia() success, stream created, initializing WebAudioRecorder...'
+          )
+
+          const AudioContext = window.AudioContext || window.webkitAudioContext
+          this.audioContext = new AudioContext()
+
+          // assign to getUserMediaStream for later use
+          this.getUserMediaStream = stream
+          /* use the stream */
+          this.input = this.audioContext.createMediaStreamSource(stream)
+
+          const options = {
+            workerDir: 'js/WebAudioRecorder/',
+            encoding: ENCODING_TYPE,
+            onEncoderLoading: (recorder, encoding) => {
+              // show "loading encoder..." display
+              console.warn('Loading ' + encoding + ' encoder...')
+            },
+            onEncoderLoaded: (recorder, encoding) => {
+              // hide "loading encoder..." display
+              console.warn(encoding + ' encoder loaded')
+            },
+            onComplete: (recorder, blob) => {
+              console.warn('Encoding complete')
+              const url = URL.createObjectURL(blob)
+
+              this.recordings.push({
+                number: ++this.count,
+                id: getId(url), // the url already gives us a unique id, so we might as well use that :D
+                audio: url,
+                blob,
+                encoding: ENCODING_TYPE
+              })
+
+              function getId(url) {
+                const href = url.replace('blob:', '')
+                const parser = document.createElement('a')
+
+                parser.href = href
+                return parser.pathname.substring(1)
+              }
+            },
+            onTimeout: this.stopRecording
+          }
+
+          this.recorder = new window.WebAudioRecorder(this.input, options)
+
+          this.recorder.setOptions({
+            timeLimit: this.TIME_LIMIT,
+            encodeAfterRecord: ENCODE_AFTER_RECORD,
+            mp3: {
+              bitRate: 160
+            }
+          })
         })
     }
   },
@@ -151,85 +230,18 @@ export default {
       }
     },
     cancelRecording() {
+      this.recorder.cancelRecording()
       this.timerStatus = 'stopped'
       this.isRecording = false
     },
     startRecording() {
-      if (navigator && navigator.mediaDevices) {
-        navigator.mediaDevices
-          .getUserMedia({
-            audio: true
-          })
-          .then((stream) => {
-            console.warn(
-              'getUserMedia() success, stream created, initializing WebAudioRecorder...'
-            )
-
-            const AudioContext =
-              window.AudioContext || window.webkitAudioContext
-            this.audioContext = new AudioContext()
-
-            // assign to getUserMediaStream for later use
-            this.getUserMediaStream = stream
-            /* use the stream */
-            this.input = this.audioContext.createMediaStreamSource(stream)
-
-            this.recorder = new window.WebAudioRecorder(this.input, {
-              workerDir: 'js/WebAudioRecorder/',
-              encoding: ENCODING_TYPE,
-              onEncoderLoading: (recorder, encoding) => {
-                // show "loading encoder..." display
-                console.warn('Loading ' + encoding + ' encoder...')
-              },
-              onEncoderLoaded: (recorder, encoding) => {
-                // hide "loading encoder..." display
-                console.warn(encoding + ' encoder loaded')
-              },
-              onComplete: (recorder, blob) => {
-                console.warn('Encoding complete')
-                const url = URL.createObjectURL(blob)
-
-                this.recordings.push({
-                  number: ++this.count,
-                  id: getId(url), // the url already gives us a unique id, so we might as well use that :D
-                  audio: url,
-                  blob,
-                  encoding: ENCODING_TYPE
-                })
-
-                function getId(url) {
-                  const href = url.replace('blob:', '')
-                  const parser = document.createElement('a')
-
-                  parser.href = href
-                  return parser.pathname.substring(1)
-                }
-              },
-              onTimeout: this.stopRecording
-            })
-
-            this.recorder.setOptions({
-              timeLimit: this.TIME_LIMIT,
-              encodeAfterRecord: ENCODE_AFTER_RECORD,
-              mp3: {
-                bitRate: 160
-              }
-            })
-
-            this.recorder.startRecording()
-            console.warn('Recording started')
-            this.isRecording = true
-          })
-          .catch((err) => {
-            console.error('something went terribly wrong', err)
-          })
-      }
+      this.recorder.startRecording()
+      console.warn('Recording started')
+      this.isRecording = true
     },
     stopRecording() {
       this.isRecording = false
       this.timerStatus = 'stopped'
-
-      this.getUserMediaStream.getAudioTracks()[0].stop()
 
       // tell the recorder to finish the recording (stop recording + encode the recorded audio)
       this.recorder.finishRecording()

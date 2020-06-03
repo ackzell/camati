@@ -1,20 +1,27 @@
 <template>
-  <v-list elevation="5" shaped color="primary">
+  <v-list elevation="0" shaped color="primary">
     <v-list-item-group
       v-model="selected"
+      class="py-0"
+      group
       mandatory
       @change="$emit('input', selected)"
     >
-      <div v-for="(recording, index) in recordingsInternal" :key="recording.id">
-        <recording-item
-          :recording="recording"
-          @remove-item="remove(recording.id)"
-        ></recording-item>
-        <v-divider
-          v-show="index != recordingsInternal.length - 1"
-          inset
-        ></v-divider>
-      </div>
+      <v-slide-y-transition group>
+        <div
+          v-for="(recording, index) in recordingsInternal"
+          :key="recording.id"
+        >
+          <recording-item
+            :recording="recording"
+            @remove-item="remove(recording.id)"
+          ></recording-item>
+          <v-divider
+            v-if="index !== recordingsInternal.length - 1"
+            inset
+          ></v-divider>
+        </div>
+      </v-slide-y-transition>
     </v-list-item-group>
   </v-list>
 </template>
@@ -28,7 +35,7 @@ export default {
   props: {
     value: {
       type: Number,
-      default: null
+      default: 0
     },
     recordings: {
       type: Array,
@@ -52,3 +59,8 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+.v-move {
+  transition: transform 1s;
+}
+</style>
