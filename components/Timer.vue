@@ -65,7 +65,7 @@ export default {
     },
     incrementTime() {
       this.remainingTime = --this.remainingTime
-      if (this.remainingTime > this.timeLimit) {
+      if (this.remainingTime >= this.timeLimit) {
         this.stopTimer()
       }
     },
