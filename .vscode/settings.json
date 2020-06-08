@@ -3,6 +3,6 @@
   "editor.fontSize": 16,
   "editor.formatOnSave": true,
   "workbench.iconTheme": "ayu",
-  "workbench.colorTheme": "Ayu Dark Bordered",
+  "workbench.colorTheme": "Ayu Light Bordered",
   "vetur.format.defaultFormatter.html": "prettier"
 }
