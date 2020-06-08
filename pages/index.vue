@@ -72,7 +72,7 @@
         <v-banner>
           Send recording:
           <span v-if="recordings.length" class="overline">{{
-            `Recording ${selected + 1}`
+            selectedLabel
           }}</span>
           <span v-else>None</span>
         </v-banner>
@@ -138,7 +138,7 @@ export default {
       recorder: null,
       input: null,
       audioContext: null,
-      selected: null,
+      selected: 0,
       timerStatus: 'stopped',
       recordings: [],
       count: 0,
@@ -148,6 +148,13 @@ export default {
       snackbar: false,
       snackbarText: '',
       snackbarError: false
+    }
+  },
+  computed: {
+    selectedLabel() {
+      return this.recordings && this.recordings[this.selected]
+        ? `Recording ${this.recordings[this.selected].number}`
+        : 'None'
     }
   },
   mounted() {
