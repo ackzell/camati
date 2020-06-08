@@ -158,6 +158,7 @@ export default {
     }
   },
   mounted() {
+    console.log(window.WebAudioRecorder)
     // get access to the mic
     if (navigator && navigator.mediaDevices) {
       navigator.mediaDevices
@@ -288,11 +289,6 @@ export default {
             "Your audio was uploaded! <br> We'll make sure to add it in the next available spot in the newsletter 😎"
         }
       )
-    }
-  },
-  head() {
-    return {
-      script: [{ src: '/WebAudioRecorder.js', defer: true }]
     }
   }
 }
