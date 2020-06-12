@@ -34,7 +34,7 @@ function record(buffer) {
   if (bufferCount++ < maxBuffers) {
     if (encoder) {
       encoder.encode(buffer)
-    } else if (recBuffers) {
+    } else {
       recBuffers.push(buffer)
     }
   } else {
