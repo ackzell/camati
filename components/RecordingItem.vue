@@ -112,9 +112,7 @@ export default {
     this.track = new Audio(this.recording.audio)
 
     this.href = this.recording.audio
-    this.download = `Recording ${this.recording.number + 1}.${
-      this.recording.encoding
-    }`
+    this.download = `Recording ${this.recording.number}.${this.recording.encoding}`
 
     this.track.addEventListener('loadeddata', () => {
       console.log('finished loading')
