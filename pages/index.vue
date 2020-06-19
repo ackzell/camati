@@ -1,9 +1,27 @@
 <template>
   <v-row align="center" justify="center">
     <v-col cols="12" sm="8" lg="4">
-      <p class="caption text-right">
-        You can record a quick message (up to 1 min) and send it to us!
-      </p>
+      <v-dialog v-model="dialog" width="70%">
+        <template v-slot:activator="{ on, attrs }">
+          <v-row>
+            <v-col class="text-right">
+              <v-btn x-small icon color="secondary" v-bind="attrs" v-on="on">
+                <v-icon>mdi-help-circle</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </template>
+        <YoutubeEmbedLite
+          vid="ehKukFd2JiI"
+          thumb-quality="hq"
+          :params="{
+            autoplay: 1,
+            color: 'white',
+            modestbranding: 1,
+            enablejsapi: 1
+          }"
+        />
+      </v-dialog>
       <v-card class="elevation-12">
         <v-toolbar color="primary" flat>
           <img
@@ -118,6 +136,7 @@
 </template>
 
 <script>
+import YoutubeEmbedLite from '@miyaoka/vue-youtube-embed-lite'
 import RecordingsList from '@/components/RecordingsList'
 import Timer from '@/components/Timer'
 
@@ -127,7 +146,8 @@ const ENCODE_AFTER_RECORD = true
 export default {
   components: {
     RecordingsList,
-    Timer
+    Timer,
+    YoutubeEmbedLite
   },
   data() {
     return {
@@ -147,7 +167,8 @@ export default {
       uploadProgress: 0,
       snackbar: false,
       snackbarText: '',
-      snackbarError: false
+      snackbarError: false,
+      dialog: false
     }
   },
   computed: {
@@ -155,6 +176,17 @@ export default {
       return this.recordings && this.recordings[this.selected]
         ? `Recording ${this.recordings[this.selected].number}`
         : 'None'
+    }
+  },
+  watch: {
+    dialog(newVal) {
+      const action = newVal ? 'playVideo' : 'pauseVideo'
+      const video = document.getElementsByTagName('iframe')[0]
+      video &&
+        video.contentWindow.postMessage(
+          `{"event":"command","func":"${action}","args":""}`,
+          '*'
+        )
     }
   },
   mounted() {
@@ -168,6 +200,13 @@ export default {
           // and until we do, enable the recording button
           this.canRecord = true
         })
+    }
+
+    // const player;
+
+    // eslint-disable-next-line
+    function onYouTubeIframeAPIReady() {
+      console.log('something actually happened')
     }
   },
   methods: {
