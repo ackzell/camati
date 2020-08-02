@@ -50,6 +50,9 @@ export default {
   },
   methods: {
     remove(id) {
+      if (!confirm('Are you sure you want to remove this record?')) {
+        return
+      }
       const index = this.recordings.findIndex(
         (recording) => recording.id === id
       )
