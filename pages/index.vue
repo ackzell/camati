@@ -324,9 +324,11 @@ export default {
         },
         () => {
           // error
+          this.sending = false
           this.snackbar = true
           this.snackbarError = true
-          this.snackbarText = 'There was an error, please try again 😖'
+          this.snackbarText =
+            'Tuvimos un problema, por favor intenta de nuevo 😖'
         },
         () => {
           // success
@@ -335,7 +337,7 @@ export default {
 
           this.snackbar = true
           this.snackbarText =
-            "Your audio was uploaded! <br> We'll make sure to add it in the next available spot in the newsletter 😎"
+            '¡Gracias por tu mensaje! Lo estaremos escuchando pronto 😎'
         }
       )
     }
