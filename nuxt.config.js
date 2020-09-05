@@ -9,7 +9,7 @@ export default {
    */
   head: {
     titleTemplate: '',
-    title: 'Camati - Tlazocamati means thank you',
+    title: '(( MtR )) - My typeof Radio',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
