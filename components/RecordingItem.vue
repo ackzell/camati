@@ -1,24 +1,30 @@
 <template>
   <v-list-item :ripple="false">
-    <div class="mr-5 d-none d-sm-flex">
-      <span class="overline mr-1">Recording {{ recording.number }}</span>
+    <div class="mr-5 d-none d-sm-flex secondary--text">
+      <span class="overline mr-1">Grabación {{ recording.number }}</span>
     </div>
     <v-list-item-avatar>
       <v-tooltip bottom>
         <template v-slot:activator="{ on }">
-          <v-btn x-large icon @click="toggleAudio" v-on="on">
+          <v-btn
+            x-large
+            icon
+            @click="toggleAudio"
+            v-on="on"
+            class="secondary--text"
+          >
             <v-icon v-if="isPlaying">mdi-pause</v-icon>
             <v-icon v-else>mdi-play</v-icon>
           </v-btn>
         </template>
-        <span v-if="isPlaying">Pause</span>
-        <span v-else>Play</span>
+        <span v-if="isPlaying">Pausa</span>
+        <span v-else>Reproducir</span>
       </v-tooltip>
     </v-list-item-avatar>
     <v-list-item-content>
       <v-slider
         active
-        color="primary lighten-4"
+        color="secondary"
         rounded
         :value="progress"
         :hide-details="true"
@@ -27,11 +33,11 @@
         @end="sliderConnected = true"
       >
         <template v-slot:prepend>
-          <span class="caption">{{ elapsedTime }}</span>
+          <span class="caption secondary--text">{{ elapsedTime }}</span>
         </template>
 
         <template v-slot:append>
-          <span class="caption">{{ totalDuration }}</span>
+          <span class="caption secondary--text">{{ totalDuration }}</span>
         </template>
       </v-slider>
     </v-list-item-content>
@@ -41,7 +47,7 @@
           <v-btn
             icon
             x-small
-            color="primary darken-3"
+            color="secondary"
             :href="href"
             :download="download"
             v-on="on"
@@ -49,7 +55,7 @@
             <v-icon>mdi-download</v-icon>
           </v-btn>
         </template>
-        <span>Download</span>
+        <span>Descargar</span>
       </v-tooltip>
     </v-list-item-action-text>
 
@@ -59,7 +65,7 @@
           <v-btn
             icon
             x-small
-            color="primary lighten-3"
+            color="secondary"
             @click="$emit('remove-item', recording.id)"
             v-on="on"
           >

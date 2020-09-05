@@ -5,7 +5,7 @@
         <template v-slot:activator="{ on, attrs }">
           <v-row>
             <v-col class="text-right">
-              <v-btn x-small icon color="secondary" v-bind="attrs" v-on="on">
+              <v-btn x-small icon color="accent" v-bind="attrs" v-on="on">
                 <v-icon>mdi-help-circle</v-icon>
               </v-btn>
             </v-col>
@@ -25,9 +25,9 @@
       <v-card class="elevation-12">
         <v-toolbar color="primary" flat>
           <img
-            src="@/assets/camati_logo.svg"
-            alt="camati_logo"
-            height="150%"
+            src="@/assets/mtr_logo.svg"
+            alt="my typeof radio logo"
+            height="190%"
             title="Camati"
           />
 
@@ -42,13 +42,13 @@
                 @click="toggleRecorder"
                 v-on="on"
               >
-                <v-icon dark>{{
+                <v-icon class="white--text">{{
                   isRecording ? 'mdi-stop' : 'mdi-microphone'
                 }}</v-icon>
               </v-btn>
             </template>
-            <span v-if="!isRecording">Start recording</span>
-            <span v-else>Finish recording</span>
+            <span v-if="!isRecording">Comenzar grabación</span>
+            <span v-else>Terminar la grabación</span>
           </v-tooltip>
 
           <!-- discard recording -->
@@ -63,7 +63,7 @@
                 <v-icon small>mdi-delete</v-icon>
               </v-btn>
             </template>
-            <span>Discard recording</span>
+            <span>Cancelar grabación</span>
           </v-tooltip>
         </v-toolbar>
         <v-card-text>
@@ -77,8 +77,8 @@
             ></recordings-list>
             <v-layout v-else fill-height align-center>
               <v-flex>
-                <p class="text-center text--secondary mb-0">
-                  Recordings will appear here
+                <p class="text-center mb-0 secondary--text">
+                  Aquí aparecerán tus grabaciones
                 </p>
               </v-flex>
             </v-layout>
@@ -88,17 +88,17 @@
 
       <v-card class="mt-4">
         <v-banner>
-          Send recording:
+          Enviar grabación:
           <span v-if="recordings.length" class="overline">{{
             selectedLabel
           }}</span>
-          <span v-else>None</span>
+          <span v-else>Ninguna</span>
         </v-banner>
         <v-card-text>
           <v-text-field
             v-model="name"
             name="name"
-            label="Your Name"
+            label="Tu nombre"
             single-line
           ></v-text-field>
         </v-card-text>
@@ -109,7 +109,7 @@
             color="primary"
             :disabled="(!recordings.length && !selected) || !name || sending"
             @click="send"
-            >{{ sending ? 'Sending...' : 'Send it!' }}</v-btn
+            >{{ sending ? 'Enviando...' : '¡Envíala!' }}</v-btn
           >
         </v-card-actions>
         <v-progress-linear
@@ -120,7 +120,7 @@
     </v-col>
     <v-snackbar
       v-model="snackbar"
-      :timeout="0"
+      :timeout="-1"
       top
       :color="snackbarError ? 'red accent-4' : 'green darken-2'"
       multi-line
@@ -129,7 +129,7 @@
       <!-- eslint-disable-next-line -->
       <span v-html="snackbarText"></span>
       <v-btn text @click="snackbar = false">
-        Close
+        Cerrar
       </v-btn>
     </v-snackbar>
   </v-row>
@@ -174,8 +174,8 @@ export default {
   computed: {
     selectedLabel() {
       return this.recordings && this.recordings[this.selected]
-        ? `Recording ${this.recordings[this.selected].number}`
-        : 'None'
+        ? `Grabación ${this.recordings[this.selected].number}`
+        : 'Ninguna'
     }
   },
   watch: {

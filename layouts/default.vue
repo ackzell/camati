@@ -1,12 +1,14 @@
 <template>
-  <v-app dark>
-    <v-content>
+  <v-app id="app" dark>
+    <v-main>
       <v-container>
         <nuxt />
       </v-container>
-    </v-content>
-    <v-footer :fixed="fixed" app>
+    </v-main>
+    <v-footer :fixed="fixed" app color="primary">
       <span>&copy; {{ new Date().getFullYear() }}</span>
+      <v-spacer />
+      <span>(( MtR ))</span>
     </v-footer>
   </v-app>
 </template>
@@ -20,3 +22,8 @@ export default {
   }
 }
 </script>
+<style>
+#app {
+  background-color: var(--v-background-base);
+}
+</style>
