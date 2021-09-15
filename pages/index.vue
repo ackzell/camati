@@ -12,7 +12,7 @@
           </v-row>
         </template>
         <YoutubeEmbedLite
-          vid="ehKukFd2JiI"
+          vid="iU_kVbCt3aI"
           thumb-quality="hq"
           :params="{
             autoplay: 1,
@@ -128,9 +128,7 @@
     >
       <!-- eslint-disable-next-line -->
       <span v-html="snackbarText"></span>
-      <v-btn text @click="snackbar = false">
-        Close
-      </v-btn>
+      <v-btn text @click="snackbar = false"> Close </v-btn>
     </v-snackbar>
   </v-row>
 </template>
